@@ -1,0 +1,148 @@
+{
+  "contractName": "Vox",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "OperatorNotAllowed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OPERATOR_FILTER_REGISTRY",
+      "outputs": [
+        {
+          "internalType": "contract IOperatorFilterRegistry",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"OperatorNotAllowed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OPERATOR_FILTER_REGISTRY\",\"outputs\":[{\"internalType\":\"contract IOperatorFilterRegistry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"errors\":{\"OperatorNotAllowed(address)\":[{\"details\":\"Emitted when an operator is not allowed.\"}]},\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Vox.sol\":\"Vox\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"operator-filter-registry/src/DefaultOperatorFilterer.sol\":{\"keccak256\":\"0xf65af8e5c2d6a8719cdbc5aa0e6923e1701bdc59f77ff0101b38d9d03d76d65b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8d3ea78dfa813244258d9192a05a3ae13f46880647da5a4c026c8231f38e2507\",\"dweb:/ipfs/QmeE4ycD8bw1uj7o33L48kiXT7YZ7RkegaNWb24nQ7MLgc\"]},\"operator-filter-registry/src/IOperatorFilterRegistry.sol\":{\"keccak256\":\"0x56ad8df389958dbf89cc30196e5f37779ee87d2e8b551d84a8d0a696e1c69937\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7ca12c8b2d8a6c0ef1ba2204be8628c1443d9371c37aa619a3cc485267b6a30c\",\"dweb:/ipfs/QmaKXZeCR6kPRXCYo6NZJFnbBEa4eWwBKRYAKyY87vBrtc\"]},\"operator-filter-registry/src/OperatorFilterer.sol\":{\"keccak256\":\"0xa09fc95700d92846d0809a2dc39ca36eb4fcf48642fc83c3d1b5ebe62f957256\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://adf63229f1f5484c27ca8d86cf73af5244bf163c8e77cc193701f359c9bdb175\",\"dweb:/ipfs/QmVZPr3BM9CjwLyxHjdjbqBUUSS2Vzr1WRktadgV9UDqvq\"]},\"operator-filter-registry/src/lib/Constants.sol\":{\"keccak256\":\"0x7528c20593155653256c5ea043e0f56e65b2f8c59946c61fb136a22868d4184e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://71d0b1ac75a8bfb054d13415b01a32fdee313975ef154ed21e8e49ef92a1b308\",\"dweb:/ipfs/QmTMjZne7RgUGLjkB5RfyZwuny2Qw1AmznYuHQJp5rePdu\"]},\"project:/contracts/Vox.sol\":{\"keccak256\":\"0x7103b6dbef10b9d89fae6fc1759abd9af5134afba753076129d8b3923b690f25\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://69fdc63c778f1dfeb068df3b820223fcb3dd883a2da52ef0b6f8a84d7849b7f4\",\"dweb:/ipfs/QmVqEfmEThok7Q1DiZvoSVEjvaWTWHxkjKaLzzTyRyUvkc\"]}},\"version\":1}",
+  "bytecode": "0x608080604052346100b3576daaeb6d7670e522a718067333cd4e803b61002e575b604051608690816100b98239f35b803b156100b3578160448160008094633e9f1edf60e11b8352306004840152733cc6cdda760b79bafa08df41ecfa224f810dceb660248401525af180156100a75761007a575b80610020565b6001600160401b0381116100915760405238610074565b634e487b7160e01b600052604160045260246000fd5b6040513d6000823e3d90fd5b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c6341f4343414602857600080fd5b34604c5781600319360112604c57806daaeb6d7670e522a718067333cd4e60209252f35b5080fdfea2646970667358221220b271dbce6d829a9d7943be4f38cf3110ea0c89a0d836a56e43b036f8fb7e5b2264736f6c63430008130033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c6341f4343414602857600080fd5b34604c5781600319360112604c57806daaeb6d7670e522a718067333cd4e60209252f35b5080fdfea2646970667358221220b271dbce6d829a9d7943be4f38cf3110ea0c89a0d836a56e43b036f8fb7e5b2264736f6c63430008130033",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "133:46:9:-:0;;;;;;;120:42:7;1750:45:6;;1746:537;;-1:-1:-1;133:46:9;;;;;;;;;1746:537:6;1848:92;;;;;1233:67;;;1798:1;1233:67;;;;;1848:92;;1902:4;1848:92;;;1233:67;211:42:7;1233:67:6;;;;1848:92;;;;;;;;1746:537;;;;1848:92;-1:-1:-1;;;;;1233:67:6;;;;133:46:9;1233:67:6;1848:92;;;1233:67;;;;1798:1;1233:67;;1848:92;1233:67;;1798:1;1233:67;1848:92;133:46:9;;1233:67:6;1798:1;1233:67;;;;;1848:92;1798:1;133:46:9;",
+  "deployedSourceMap": "133:46:9:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;120:42:7;133:46:9;;;;;;;",
+  "source": "// SPDX-License-Identifier: MIT\r\n\r\npragma solidity ^0.8.13;\r\n\r\nimport \"operator-filter-registry/src/DefaultOperatorFilterer.sol\";\r\n\r\ncontract Vox is DefaultOperatorFilterer {\r\n\r\n}\r\n",
+  "sourcePath": "D:\\workspace\\projects\\test\\contracts\\Vox.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/Vox.sol",
+    "exportedSymbols": {
+      "CANONICAL_CORI_SUBSCRIPTION": [
+        1012
+      ],
+      "DefaultOperatorFilterer": [
+        645
+      ],
+      "OperatorFilterer": [
+        1004
+      ],
+      "Vox": [
+        1033
+      ]
+    },
+    "id": 1034,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1029,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".13"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "35:24:9"
+      },
+      {
+        "absolutePath": "operator-filter-registry/src/DefaultOperatorFilterer.sol",
+        "file": "operator-filter-registry/src/DefaultOperatorFilterer.sol",
+        "id": 1030,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 1034,
+        "sourceUnit": 646,
+        "src": "63:66:9",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 1031,
+              "name": "DefaultOperatorFilterer",
+              "nameLocations": [
+                "149:23:9"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 645,
+              "src": "149:23:9"
+            },
+            "id": 1032,
+            "nodeType": "InheritanceSpecifier",
+            "src": "149:23:9"
+          }
+        ],
+        "canonicalName": "Vox",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 1033,
+        "linearizedBaseContracts": [
+          1033,
+          645,
+          1004
+        ],
+        "name": "Vox",
+        "nameLocation": "142:3:9",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 1034,
+        "src": "133:46:9",
+        "usedErrors": [
+          875
+        ]
+      }
+    ],
+    "src": "35:146:9"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.19+commit.7dd6d404.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.14",
+  "updatedAt": "2023-06-13T20:58:36.243Z",
+  "devdoc": {
+    "errors": {
+      "OperatorNotAllowed(address)": [
+        {
+          "details": "Emitted when an operator is not allowed."
+        }
+      ]
+    },
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
