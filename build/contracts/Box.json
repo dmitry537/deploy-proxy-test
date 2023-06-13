@@ -1,0 +1,365 @@
+{
+  "contractName": "Box",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "OperatorNotAllowed",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "version",
+          "type": "uint8"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "OPERATOR_FILTER_REGISTRY",
+      "outputs": [
+        {
+          "internalType": "contract IOperatorFilterRegistry",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"OperatorNotAllowed\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"OPERATOR_FILTER_REGISTRY\",\"outputs\":[{\"internalType\":\"contract IOperatorFilterRegistry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"errors\":{\"OperatorNotAllowed(address)\":[{\"details\":\"Emitted when an operator is not allowed.\"}]},\"events\":{\"Initialized(uint8)\":{\"details\":\"Triggered when the contract has been initialized or reinitialized.\"}},\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Box.sol\":\"Box\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\":{\"keccak256\":\"0x247c62047745915c0af6b955470a72d1696ebad4352d7d3011aef1a2463cd888\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d7fc8396619de513c96b6e00301b88dd790e83542aab918425633a5f7297a15a\",\"dweb:/ipfs/QmXbP4kiZyp7guuS7xe8KaybnwkRPGrBc2Kbi3vhcTfpxb\"]},\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\":{\"keccak256\":\"0xe798cadb41e2da274913e4b3183a80f50fb057a42238fe8467e077268100ec27\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://899f850f7df5a270bccfb765d70069959ca1c20d3a7381c1c3bda8a3ffee1935\",\"dweb:/ipfs/QmVdnAqwyX2L3nX2HDA5WKGtVBFyH1nKE9A1k7fZnPBkhP\"]},\"@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol\":{\"keccak256\":\"0x2edcb41c121abc510932e8d83ff8b82cf9cdde35e7c297622f5c29ef0af25183\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://72460c66cd1c3b1c11b863e0d8df0a1c56f37743019e468dc312c754f43e3b06\",\"dweb:/ipfs/QmPExYKiNb9PUsgktQBupPaM33kzDHxaYoVeJdLhv8s879\"]},\"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol\":{\"keccak256\":\"0x963ea7f0b48b032eef72fe3a7582edf78408d6f834115b9feadd673a4d5bd149\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d6520943ea55fdf5f0bafb39ed909f64de17051bc954ff3e88c9e5621412c79c\",\"dweb:/ipfs/QmWZ4rAKTQbNG2HxGs46AcTXShsVytKeLs7CUCdCSv5N7a\"]},\"operator-filter-registry/src/DefaultOperatorFilterer.sol\":{\"keccak256\":\"0xf65af8e5c2d6a8719cdbc5aa0e6923e1701bdc59f77ff0101b38d9d03d76d65b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8d3ea78dfa813244258d9192a05a3ae13f46880647da5a4c026c8231f38e2507\",\"dweb:/ipfs/QmeE4ycD8bw1uj7o33L48kiXT7YZ7RkegaNWb24nQ7MLgc\"]},\"operator-filter-registry/src/IOperatorFilterRegistry.sol\":{\"keccak256\":\"0x56ad8df389958dbf89cc30196e5f37779ee87d2e8b551d84a8d0a696e1c69937\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7ca12c8b2d8a6c0ef1ba2204be8628c1443d9371c37aa619a3cc485267b6a30c\",\"dweb:/ipfs/QmaKXZeCR6kPRXCYo6NZJFnbBEa4eWwBKRYAKyY87vBrtc\"]},\"operator-filter-registry/src/OperatorFilterer.sol\":{\"keccak256\":\"0xa09fc95700d92846d0809a2dc39ca36eb4fcf48642fc83c3d1b5ebe62f957256\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://adf63229f1f5484c27ca8d86cf73af5244bf163c8e77cc193701f359c9bdb175\",\"dweb:/ipfs/QmVZPr3BM9CjwLyxHjdjbqBUUSS2Vzr1WRktadgV9UDqvq\"]},\"operator-filter-registry/src/lib/Constants.sol\":{\"keccak256\":\"0x7528c20593155653256c5ea043e0f56e65b2f8c59946c61fb136a22868d4184e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://71d0b1ac75a8bfb054d13415b01a32fdee313975ef154ed21e8e49ef92a1b308\",\"dweb:/ipfs/QmTMjZne7RgUGLjkB5RfyZwuny2Qw1AmznYuHQJp5rePdu\"]},\"project:/contracts/Box.sol\":{\"keccak256\":\"0xa031222ccc65d19634d51c23d3e3e5d397bac4411da5d794ae7fef1b200ea522\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a5698a63e1de923e0847726714ddfea7f3bac8939b04a0296a7c68631366d82\",\"dweb:/ipfs/QmQWp3d26Fz9Sphfn5EVK6ATuoYXPWVuyFkw5hmao33uzJ\"]}},\"version\":1}",
+  "bytecode": "0x608080604052346100b4576daaeb6d7670e522a718067333cd4e803b61002f575b60405161040c90816100ba8239f35b803b156100b4578160448160008094633e9f1edf60e11b8352306004840152733cc6cdda760b79bafa08df41ecfa224f810dceb660248401525af180156100a85761007b575b80610020565b6001600160401b0381116100925760405238610075565b634e487b7160e01b600052604160045260246000fd5b6040513d6000823e3d90fd5b600080fdfe608080604052600436101561001357600080fd5b600090813560e01c90816341f43434146102a957508063715018a61461024c5780638129fc1c1461011a5780638da5cb5b146100f15763f2fde38b1461005857600080fd5b346100ee5760203660031901126100ee576004356001600160a01b0381168082036100ea576100856102d5565b15610096576100939061032d565b80f35b60405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608490fd5b8280fd5b80fd5b50346100ee57806003193601126100ee576033546040516001600160a01b039091168152602090f35b50346100ee57806003193601126100ee57805460ff8160081c16159081809261023f575b8015610228575b156101cc5760ff1981166001178355816101bb575b5061017460ff835460081c1661016f81610376565b610376565b61017d3361032d565b6101845780f35b61ff001981541681557f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498602060405160018152a180f35b61ffff19166101011782553861015a565b60405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b6064820152608490fd5b50303b1580156101455750600160ff821614610145565b50600160ff82161061013e565b50346100ee57806003193601126100ee576102656102d5565b603380546001600160a01b0319811690915581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b9050346102d157816003193601126102d157806daaeb6d7670e522a718067333cd4e60209252f35b5080fd5b6033546001600160a01b031633036102e957565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fd5b603380546001600160a01b039283166001600160a01b0319821681179092559091167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0600080a3565b1561037d57565b60405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608490fdfea264697066735822122061f643c8e8e6f99eee880db46162f8726119e812e8a55adcb20fe57389ec4a6764736f6c63430008130033",
+  "deployedBytecode": "0x608080604052600436101561001357600080fd5b600090813560e01c90816341f43434146102a957508063715018a61461024c5780638129fc1c1461011a5780638da5cb5b146100f15763f2fde38b1461005857600080fd5b346100ee5760203660031901126100ee576004356001600160a01b0381168082036100ea576100856102d5565b15610096576100939061032d565b80f35b60405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608490fd5b8280fd5b80fd5b50346100ee57806003193601126100ee576033546040516001600160a01b039091168152602090f35b50346100ee57806003193601126100ee57805460ff8160081c16159081809261023f575b8015610228575b156101cc5760ff1981166001178355816101bb575b5061017460ff835460081c1661016f81610376565b610376565b61017d3361032d565b6101845780f35b61ff001981541681557f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498602060405160018152a180f35b61ffff19166101011782553861015a565b60405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b6064820152608490fd5b50303b1580156101455750600160ff821614610145565b50600160ff82161061013e565b50346100ee57806003193601126100ee576102656102d5565b603380546001600160a01b0319811690915581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b9050346102d157816003193601126102d157806daaeb6d7670e522a718067333cd4e60209252f35b5080fd5b6033546001600160a01b031633036102e957565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fd5b603380546001600160a01b039283166001600160a01b0319821681179092559091167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0600080a3565b1561037d57565b60405162461bcd60e51b815260206004820152602b60248201527f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960448201526a6e697469616c697a696e6760a81b6064820152608490fdfea264697066735822122061f643c8e8e6f99eee880db46162f8726119e812e8a55adcb20fe57389ec4a6764736f6c63430008130033",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "210:148:8:-:0;;;;;;;120:42:7;1750:45:6;;1746:537;;-1:-1:-1;210:148:8;;;;;;;;;1746:537:6;1848:92;;;;;1233:67;;;1798:1;1233:67;;;;;1848:92;;1902:4;1848:92;;;1233:67;211:42:7;1233:67:6;;;;1848:92;;;;;;;;1746:537;;;;1848:92;-1:-1:-1;;;;;1233:67:6;;;;210:148:8;1233:67:6;1848:92;;;1233:67;;;;1798:1;1233:67;;1848:92;1233:67;;1798:1;1233:67;1848:92;210:148:8;;1233:67:6;1798:1;1233:67;;;;;1848:92;1798:1;210:148:8;",
+  "deployedSourceMap": "210:148:8:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;210:148:8;;;;;;-1:-1:-1;;;;;120:42:7;;210:148:8;;;;;1303:62:0;;:::i;:::-;2409:22;210:148:8;;2503:8:0;;;:::i;:::-;210:148:8;;;;;-1:-1:-1;;;210:148:8;;;;;;;;;;;;;;;;;-1:-1:-1;;;210:148:8;;;;;;;;;;;;;;;;;;;;;;;;;;;1513:6:0;210:148:8;;;-1:-1:-1;;;;;120:42:7;;;210:148:8;;;;;;;;;;;;;;;;;;;;;;;;;3290:14:1;3336:34;;;;;;210:148:8;3335:108:1;;;;210:148:8;;;;-1:-1:-1;;210:148:8;;3540:1:1;210:148:8;;;;3551:65:1;;210:148:8;;5355:69:1;210:148:8;;;;;;5355:69:1;;;:::i;:::-;;:::i;:::-;1195:12:0;929:10:3;1195:12:0;:::i;:::-;3636:99:1;;210:148:8;;3636:99:1;210:148:8;;;;;;;3710:14:1;210:148:8;;;3540:1:1;210:148:8;;3710:14:1;210:148:8;;3551:65:1;-1:-1:-1;;210:148:8;;;;;3551:65:1;;;210:148:8;;;-1:-1:-1;;;210:148:8;;;;;;;;;;;;;;;;;-1:-1:-1;;;210:148:8;;;;;;;3335:108:1;3415:4;;1476:19:2;:23;3376:66:1;;3335:108;3376:66;210:148:8;3441:1:1;210:148:8;;;3425:17:1;3335:108;;3336:34;210:148:8;3369:1:1;210:148:8;;;3354:16:1;3336:34;;210:148:8;;;;;;;;;;;;;1303:62:0;;:::i;:::-;2765:6;210:148:8;;-1:-1:-1;;;;;;210:148:8;;;;;;;-1:-1:-1;;;;;120:42:7;2813:40:0;210:148:8;;2813:40:0;210:148:8;;;;;;;;;;;;;;;;;120:42:7;210:148:8;;;;;;;;1599:130:0;1513:6;210:148:8;-1:-1:-1;;;;;120:42:7;929:10:3;1662:23:0;210:148:8;;1599:130:0:o;210:148:8:-;;;;;;;;;;;;;;;;;;;;;;;;;2673:187:0;2765:6;210:148:8;;-1:-1:-1;;;;;120:42:7;;;-1:-1:-1;;;;;;210:148:8;;;;;;;120:42:7;;;2813:40:0;-1:-1:-1;;2813:40:0;2673:187::o;210:148:8:-;;;;:::o;:::-;;;-1:-1:-1;;;210:148:8;;;;;;;;;;;;;;;;;-1:-1:-1;;;210:148:8;;;;;;",
+  "source": "// SPDX-License-Identifier: MIT\r\n\r\npragma solidity ^0.8.13;\r\n\r\nimport \"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\";\r\nimport \"operator-filter-registry/src/DefaultOperatorFilterer.sol\";\r\n\r\ncontract Box is DefaultOperatorFilterer, OwnableUpgradeable {\r\n\r\n    function initialize() public initializer {\r\n        __Ownable_init();\r\n    }\r\n}\r\n",
+  "sourcePath": "D:\\workspace\\projects\\test\\contracts\\Box.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/Box.sol",
+    "exportedSymbols": {
+      "AddressUpgradeable": [
+        584
+      ],
+      "Box": [
+        1030
+      ],
+      "CANONICAL_CORI_SUBSCRIPTION": [
+        1012
+      ],
+      "ContextUpgradeable": [
+        626
+      ],
+      "DefaultOperatorFilterer": [
+        645
+      ],
+      "Initializable": [
+        300
+      ],
+      "OperatorFilterer": [
+        1004
+      ],
+      "OwnableUpgradeable": [
+        131
+      ]
+    },
+    "id": 1031,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1014,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".13"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "35:24:8"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "file": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
+        "id": 1015,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 1031,
+        "sourceUnit": 132,
+        "src": "63:75:8",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "operator-filter-registry/src/DefaultOperatorFilterer.sol",
+        "file": "operator-filter-registry/src/DefaultOperatorFilterer.sol",
+        "id": 1016,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 1031,
+        "sourceUnit": 646,
+        "src": "140:66:8",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 1017,
+              "name": "DefaultOperatorFilterer",
+              "nameLocations": [
+                "226:23:8"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 645,
+              "src": "226:23:8"
+            },
+            "id": 1018,
+            "nodeType": "InheritanceSpecifier",
+            "src": "226:23:8"
+          },
+          {
+            "baseName": {
+              "id": 1019,
+              "name": "OwnableUpgradeable",
+              "nameLocations": [
+                "251:18:8"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 131,
+              "src": "251:18:8"
+            },
+            "id": 1020,
+            "nodeType": "InheritanceSpecifier",
+            "src": "251:18:8"
+          }
+        ],
+        "canonicalName": "Box",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 1030,
+        "linearizedBaseContracts": [
+          1030,
+          131,
+          626,
+          300,
+          645,
+          1004
+        ],
+        "name": "Box",
+        "nameLocation": "219:3:8",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 1028,
+              "nodeType": "Block",
+              "src": "320:35:8",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 1025,
+                      "name": "__Ownable_init",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 26,
+                      "src": "331:14:8",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
+                        "typeString": "function ()"
+                      }
+                    },
+                    "id": 1026,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "331:16:8",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 1027,
+                  "nodeType": "ExpressionStatement",
+                  "src": "331:16:8"
+                }
+              ]
+            },
+            "functionSelector": "8129fc1c",
+            "id": 1029,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "id": 1023,
+                "kind": "modifierInvocation",
+                "modifierName": {
+                  "id": 1022,
+                  "name": "initializer",
+                  "nameLocations": [
+                    "308:11:8"
+                  ],
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 202,
+                  "src": "308:11:8"
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "308:11:8"
+              }
+            ],
+            "name": "initialize",
+            "nameLocation": "288:10:8",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1021,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "298:2:8"
+            },
+            "returnParameters": {
+              "id": 1024,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "320:0:8"
+            },
+            "scope": 1030,
+            "src": "279:76:8",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 1031,
+        "src": "210:148:8",
+        "usedErrors": [
+          875
+        ]
+      }
+    ],
+    "src": "35:325:8"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.19+commit.7dd6d404.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.14",
+  "updatedAt": "2023-06-13T20:26:02.420Z",
+  "devdoc": {
+    "errors": {
+      "OperatorNotAllowed(address)": [
+        {
+          "details": "Emitted when an operator is not allowed."
+        }
+      ]
+    },
+    "events": {
+      "Initialized(uint8)": {
+        "details": "Triggered when the contract has been initialized or reinitialized."
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

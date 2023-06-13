@@ -1,0 +1,1785 @@
+{
+  "contractName": "OperatorFilterer",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "OperatorNotAllowed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OPERATOR_FILTER_REGISTRY",
+      "outputs": [
+        {
+          "internalType": "contract IOperatorFilterRegistry",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"OperatorNotAllowed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OPERATOR_FILTER_REGISTRY\",\"outputs\":[{\"internalType\":\"contract IOperatorFilterRegistry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"This smart contract is meant to be inherited by token contracts so they can use the following:         - `onlyAllowedOperator` modifier for `transferFrom` and `safeTransferFrom` methods.         - `onlyAllowedOperatorApproval` modifier for `approve` and `setApprovalForAll` methods.         Please note that if your token contract does not provide an owner with EIP-173, it must provide         administration methods on the contract itself to interact with the registry otherwise the subscription         will be locked to the options set during construction.\",\"errors\":{\"OperatorNotAllowed(address)\":[{\"details\":\"Emitted when an operator is not allowed.\"}]},\"kind\":\"dev\",\"methods\":{\"constructor\":{\"details\":\"The constructor that is called when the contract is being deployed.\"}},\"title\":\"OperatorFilterer\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"Abstract contract whose constructor automatically registers and optionally subscribes to or copies another         registrant's entries in the OperatorFilterRegistry.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"operator-filter-registry/src/OperatorFilterer.sol\":\"OperatorFilterer\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"operator-filter-registry/src/IOperatorFilterRegistry.sol\":{\"keccak256\":\"0x56ad8df389958dbf89cc30196e5f37779ee87d2e8b551d84a8d0a696e1c69937\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7ca12c8b2d8a6c0ef1ba2204be8628c1443d9371c37aa619a3cc485267b6a30c\",\"dweb:/ipfs/QmaKXZeCR6kPRXCYo6NZJFnbBEa4eWwBKRYAKyY87vBrtc\"]},\"operator-filter-registry/src/OperatorFilterer.sol\":{\"keccak256\":\"0xa09fc95700d92846d0809a2dc39ca36eb4fcf48642fc83c3d1b5ebe62f957256\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://adf63229f1f5484c27ca8d86cf73af5244bf163c8e77cc193701f359c9bdb175\",\"dweb:/ipfs/QmVZPr3BM9CjwLyxHjdjbqBUUSS2Vzr1WRktadgV9UDqvq\"]},\"operator-filter-registry/src/lib/Constants.sol\":{\"keccak256\":\"0x7528c20593155653256c5ea043e0f56e65b2f8c59946c61fb136a22868d4184e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://71d0b1ac75a8bfb054d13415b01a32fdee313975ef154ed21e8e49ef92a1b308\",\"dweb:/ipfs/QmTMjZne7RgUGLjkB5RfyZwuny2Qw1AmznYuHQJp5rePdu\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.13;\n\nimport {IOperatorFilterRegistry} from \"./IOperatorFilterRegistry.sol\";\nimport {CANONICAL_OPERATOR_FILTER_REGISTRY_ADDRESS} from \"./lib/Constants.sol\";\n/**\n * @title  OperatorFilterer\n * @notice Abstract contract whose constructor automatically registers and optionally subscribes to or copies another\n *         registrant's entries in the OperatorFilterRegistry.\n * @dev    This smart contract is meant to be inherited by token contracts so they can use the following:\n *         - `onlyAllowedOperator` modifier for `transferFrom` and `safeTransferFrom` methods.\n *         - `onlyAllowedOperatorApproval` modifier for `approve` and `setApprovalForAll` methods.\n *         Please note that if your token contract does not provide an owner with EIP-173, it must provide\n *         administration methods on the contract itself to interact with the registry otherwise the subscription\n *         will be locked to the options set during construction.\n */\n\nabstract contract OperatorFilterer {\n    /// @dev Emitted when an operator is not allowed.\n    error OperatorNotAllowed(address operator);\n\n    IOperatorFilterRegistry public constant OPERATOR_FILTER_REGISTRY =\n        IOperatorFilterRegistry(CANONICAL_OPERATOR_FILTER_REGISTRY_ADDRESS);\n\n    /// @dev The constructor that is called when the contract is being deployed.\n    constructor(address subscriptionOrRegistrantToCopy, bool subscribe) {\n        // If an inheriting token contract is deployed to a network without the registry deployed, the modifier\n        // will not revert, but the contract will need to be registered with the registry once it is deployed in\n        // order for the modifier to filter addresses.\n        if (address(OPERATOR_FILTER_REGISTRY).code.length > 0) {\n            if (subscribe) {\n                OPERATOR_FILTER_REGISTRY.registerAndSubscribe(address(this), subscriptionOrRegistrantToCopy);\n            } else {\n                if (subscriptionOrRegistrantToCopy != address(0)) {\n                    OPERATOR_FILTER_REGISTRY.registerAndCopyEntries(address(this), subscriptionOrRegistrantToCopy);\n                } else {\n                    OPERATOR_FILTER_REGISTRY.register(address(this));\n                }\n            }\n        }\n    }\n\n    /**\n     * @dev A helper function to check if an operator is allowed.\n     */\n    modifier onlyAllowedOperator(address from) virtual {\n        // Allow spending tokens from addresses with balance\n        // Note that this still allows listings and marketplaces with escrow to transfer tokens if transferred\n        // from an EOA.\n        if (from != msg.sender) {\n            _checkFilterOperator(msg.sender);\n        }\n        _;\n    }\n\n    /**\n     * @dev A helper function to check if an operator approval is allowed.\n     */\n    modifier onlyAllowedOperatorApproval(address operator) virtual {\n        _checkFilterOperator(operator);\n        _;\n    }\n\n    /**\n     * @dev A helper function to check if an operator is allowed.\n     */\n    function _checkFilterOperator(address operator) internal view virtual {\n        // Check registry code length to facilitate testing in environments without a deployed registry.\n        if (address(OPERATOR_FILTER_REGISTRY).code.length > 0) {\n            // under normal circumstances, this function will revert rather than return false, but inheriting contracts\n            // may specify their own OperatorFilterRegistry implementations, which may behave differently\n            if (!OPERATOR_FILTER_REGISTRY.isOperatorAllowed(address(this), operator)) {\n                revert OperatorNotAllowed(operator);\n            }\n        }\n    }\n}\n",
+  "sourcePath": "operator-filter-registry\\src\\OperatorFilterer.sol",
+  "ast": {
+    "absolutePath": "operator-filter-registry/src/OperatorFilterer.sol",
+    "exportedSymbols": {
+      "CANONICAL_OPERATOR_FILTER_REGISTRY_ADDRESS": [
+        1009
+      ],
+      "IOperatorFilterRegistry": [
+        863
+      ],
+      "OperatorFilterer": [
+        1004
+      ]
+    },
+    "id": 1005,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 865,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".13"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:24:6"
+      },
+      {
+        "absolutePath": "operator-filter-registry/src/IOperatorFilterRegistry.sol",
+        "file": "./IOperatorFilterRegistry.sol",
+        "id": 867,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 1005,
+        "sourceUnit": 864,
+        "src": "58:70:6",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 866,
+              "name": "IOperatorFilterRegistry",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 863,
+              "src": "66:23:6",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "operator-filter-registry/src/lib/Constants.sol",
+        "file": "./lib/Constants.sol",
+        "id": 869,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 1005,
+        "sourceUnit": 1013,
+        "src": "129:79:6",
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 868,
+              "name": "CANONICAL_OPERATOR_FILTER_REGISTRY_ADDRESS",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 1009,
+              "src": "137:42:6",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "abstract": true,
+        "baseContracts": [],
+        "canonicalName": "OperatorFilterer",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 870,
+          "nodeType": "StructuredDocumentation",
+          "src": "209:803:6",
+          "text": " @title  OperatorFilterer\n @notice Abstract contract whose constructor automatically registers and optionally subscribes to or copies another\n         registrant's entries in the OperatorFilterRegistry.\n @dev    This smart contract is meant to be inherited by token contracts so they can use the following:\n         - `onlyAllowedOperator` modifier for `transferFrom` and `safeTransferFrom` methods.\n         - `onlyAllowedOperatorApproval` modifier for `approve` and `setApprovalForAll` methods.\n         Please note that if your token contract does not provide an owner with EIP-173, it must provide\n         administration methods on the contract itself to interact with the registry otherwise the subscription\n         will be locked to the options set during construction."
+        },
+        "fullyImplemented": true,
+        "id": 1004,
+        "linearizedBaseContracts": [
+          1004
+        ],
+        "name": "OperatorFilterer",
+        "nameLocation": "1032:16:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 871,
+              "nodeType": "StructuredDocumentation",
+              "src": "1055:49:6",
+              "text": "@dev Emitted when an operator is not allowed."
+            },
+            "errorSelector": "ede71dcc",
+            "id": 875,
+            "name": "OperatorNotAllowed",
+            "nameLocation": "1115:18:6",
+            "nodeType": "ErrorDefinition",
+            "parameters": {
+              "id": 874,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 873,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "1142:8:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 875,
+                  "src": "1134:16:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 872,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1134:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1133:18:6"
+            },
+            "src": "1109:43:6"
+          },
+          {
+            "constant": true,
+            "functionSelector": "41f43434",
+            "id": 881,
+            "mutability": "constant",
+            "name": "OPERATOR_FILTER_REGISTRY",
+            "nameLocation": "1198:24:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 1004,
+            "src": "1158:142:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+              "typeString": "contract IOperatorFilterRegistry"
+            },
+            "typeName": {
+              "id": 877,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 876,
+                "name": "IOperatorFilterRegistry",
+                "nameLocations": [
+                  "1158:23:6"
+                ],
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 863,
+                "src": "1158:23:6"
+              },
+              "referencedDeclaration": 863,
+              "src": "1158:23:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                "typeString": "contract IOperatorFilterRegistry"
+              }
+            },
+            "value": {
+              "arguments": [
+                {
+                  "id": 879,
+                  "name": "CANONICAL_OPERATOR_FILTER_REGISTRY_ADDRESS",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 1009,
+                  "src": "1257:42:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                }
+              ],
+              "expression": {
+                "argumentTypes": [
+                  {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                ],
+                "id": 878,
+                "name": "IOperatorFilterRegistry",
+                "nodeType": "Identifier",
+                "overloadedDeclarations": [],
+                "referencedDeclaration": 863,
+                "src": "1233:23:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_type$_t_contract$_IOperatorFilterRegistry_$863_$",
+                  "typeString": "type(contract IOperatorFilterRegistry)"
+                }
+              },
+              "id": 880,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "typeConversion",
+              "lValueRequested": false,
+              "nameLocations": [],
+              "names": [],
+              "nodeType": "FunctionCall",
+              "src": "1233:67:6",
+              "tryCall": false,
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                "typeString": "contract IOperatorFilterRegistry"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 941,
+              "nodeType": "Block",
+              "src": "1456:833:6",
+              "statements": [
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 896,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "expression": {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "id": 891,
+                              "name": "OPERATOR_FILTER_REGISTRY",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 881,
+                              "src": "1758:24:6",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                                "typeString": "contract IOperatorFilterRegistry"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                                "typeString": "contract IOperatorFilterRegistry"
+                              }
+                            ],
+                            "id": 890,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1750:7:6",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 889,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1750:7:6",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 892,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "nameLocations": [],
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1750:33:6",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "id": 893,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberLocation": "1784:4:6",
+                        "memberName": "code",
+                        "nodeType": "MemberAccess",
+                        "src": "1750:38:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      },
+                      "id": 894,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberLocation": "1789:6:6",
+                      "memberName": "length",
+                      "nodeType": "MemberAccess",
+                      "src": "1750:45:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": ">",
+                    "rightExpression": {
+                      "hexValue": "30",
+                      "id": 895,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "1798:1:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "1750:49:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 940,
+                  "nodeType": "IfStatement",
+                  "src": "1746:537:6",
+                  "trueBody": {
+                    "id": 939,
+                    "nodeType": "Block",
+                    "src": "1801:482:6",
+                    "statements": [
+                      {
+                        "condition": {
+                          "id": 897,
+                          "name": "subscribe",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 886,
+                          "src": "1819:9:6",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "falseBody": {
+                          "id": 937,
+                          "nodeType": "Block",
+                          "src": "1961:312:6",
+                          "statements": [
+                            {
+                              "condition": {
+                                "commonType": {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                },
+                                "id": 914,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "lValueRequested": false,
+                                "leftExpression": {
+                                  "id": 909,
+                                  "name": "subscriptionOrRegistrantToCopy",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 884,
+                                  "src": "1983:30:6",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_address",
+                                    "typeString": "address"
+                                  }
+                                },
+                                "nodeType": "BinaryOperation",
+                                "operator": "!=",
+                                "rightExpression": {
+                                  "arguments": [
+                                    {
+                                      "hexValue": "30",
+                                      "id": 912,
+                                      "isConstant": false,
+                                      "isLValue": false,
+                                      "isPure": true,
+                                      "kind": "number",
+                                      "lValueRequested": false,
+                                      "nodeType": "Literal",
+                                      "src": "2025:1:6",
+                                      "typeDescriptions": {
+                                        "typeIdentifier": "t_rational_0_by_1",
+                                        "typeString": "int_const 0"
+                                      },
+                                      "value": "0"
+                                    }
+                                  ],
+                                  "expression": {
+                                    "argumentTypes": [
+                                      {
+                                        "typeIdentifier": "t_rational_0_by_1",
+                                        "typeString": "int_const 0"
+                                      }
+                                    ],
+                                    "id": 911,
+                                    "isConstant": false,
+                                    "isLValue": false,
+                                    "isPure": true,
+                                    "lValueRequested": false,
+                                    "nodeType": "ElementaryTypeNameExpression",
+                                    "src": "2017:7:6",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_type$_t_address_$",
+                                      "typeString": "type(address)"
+                                    },
+                                    "typeName": {
+                                      "id": 910,
+                                      "name": "address",
+                                      "nodeType": "ElementaryTypeName",
+                                      "src": "2017:7:6",
+                                      "typeDescriptions": {}
+                                    }
+                                  },
+                                  "id": 913,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "typeConversion",
+                                  "lValueRequested": false,
+                                  "nameLocations": [],
+                                  "names": [],
+                                  "nodeType": "FunctionCall",
+                                  "src": "2017:10:6",
+                                  "tryCall": false,
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_address",
+                                    "typeString": "address"
+                                  }
+                                },
+                                "src": "1983:44:6",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_bool",
+                                  "typeString": "bool"
+                                }
+                              },
+                              "falseBody": {
+                                "id": 935,
+                                "nodeType": "Block",
+                                "src": "2170:89:6",
+                                "statements": [
+                                  {
+                                    "expression": {
+                                      "arguments": [
+                                        {
+                                          "arguments": [
+                                            {
+                                              "id": 931,
+                                              "name": "this",
+                                              "nodeType": "Identifier",
+                                              "overloadedDeclarations": [],
+                                              "referencedDeclaration": 4294967268,
+                                              "src": "2234:4:6",
+                                              "typeDescriptions": {
+                                                "typeIdentifier": "t_contract$_OperatorFilterer_$1004",
+                                                "typeString": "contract OperatorFilterer"
+                                              }
+                                            }
+                                          ],
+                                          "expression": {
+                                            "argumentTypes": [
+                                              {
+                                                "typeIdentifier": "t_contract$_OperatorFilterer_$1004",
+                                                "typeString": "contract OperatorFilterer"
+                                              }
+                                            ],
+                                            "id": 930,
+                                            "isConstant": false,
+                                            "isLValue": false,
+                                            "isPure": true,
+                                            "lValueRequested": false,
+                                            "nodeType": "ElementaryTypeNameExpression",
+                                            "src": "2226:7:6",
+                                            "typeDescriptions": {
+                                              "typeIdentifier": "t_type$_t_address_$",
+                                              "typeString": "type(address)"
+                                            },
+                                            "typeName": {
+                                              "id": 929,
+                                              "name": "address",
+                                              "nodeType": "ElementaryTypeName",
+                                              "src": "2226:7:6",
+                                              "typeDescriptions": {}
+                                            }
+                                          },
+                                          "id": 932,
+                                          "isConstant": false,
+                                          "isLValue": false,
+                                          "isPure": false,
+                                          "kind": "typeConversion",
+                                          "lValueRequested": false,
+                                          "nameLocations": [],
+                                          "names": [],
+                                          "nodeType": "FunctionCall",
+                                          "src": "2226:13:6",
+                                          "tryCall": false,
+                                          "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                          }
+                                        }
+                                      ],
+                                      "expression": {
+                                        "argumentTypes": [
+                                          {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                          }
+                                        ],
+                                        "expression": {
+                                          "id": 926,
+                                          "name": "OPERATOR_FILTER_REGISTRY",
+                                          "nodeType": "Identifier",
+                                          "overloadedDeclarations": [],
+                                          "referencedDeclaration": 881,
+                                          "src": "2192:24:6",
+                                          "typeDescriptions": {
+                                            "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                                            "typeString": "contract IOperatorFilterRegistry"
+                                          }
+                                        },
+                                        "id": 928,
+                                        "isConstant": false,
+                                        "isLValue": false,
+                                        "isPure": false,
+                                        "lValueRequested": false,
+                                        "memberLocation": "2217:8:6",
+                                        "memberName": "register",
+                                        "nodeType": "MemberAccess",
+                                        "referencedDeclaration": 663,
+                                        "src": "2192:33:6",
+                                        "typeDescriptions": {
+                                          "typeIdentifier": "t_function_external_nonpayable$_t_address_$returns$__$",
+                                          "typeString": "function (address) external"
+                                        }
+                                      },
+                                      "id": 933,
+                                      "isConstant": false,
+                                      "isLValue": false,
+                                      "isPure": false,
+                                      "kind": "functionCall",
+                                      "lValueRequested": false,
+                                      "nameLocations": [],
+                                      "names": [],
+                                      "nodeType": "FunctionCall",
+                                      "src": "2192:48:6",
+                                      "tryCall": false,
+                                      "typeDescriptions": {
+                                        "typeIdentifier": "t_tuple$__$",
+                                        "typeString": "tuple()"
+                                      }
+                                    },
+                                    "id": 934,
+                                    "nodeType": "ExpressionStatement",
+                                    "src": "2192:48:6"
+                                  }
+                                ]
+                              },
+                              "id": 936,
+                              "nodeType": "IfStatement",
+                              "src": "1979:280:6",
+                              "trueBody": {
+                                "id": 925,
+                                "nodeType": "Block",
+                                "src": "2029:135:6",
+                                "statements": [
+                                  {
+                                    "expression": {
+                                      "arguments": [
+                                        {
+                                          "arguments": [
+                                            {
+                                              "id": 920,
+                                              "name": "this",
+                                              "nodeType": "Identifier",
+                                              "overloadedDeclarations": [],
+                                              "referencedDeclaration": 4294967268,
+                                              "src": "2107:4:6",
+                                              "typeDescriptions": {
+                                                "typeIdentifier": "t_contract$_OperatorFilterer_$1004",
+                                                "typeString": "contract OperatorFilterer"
+                                              }
+                                            }
+                                          ],
+                                          "expression": {
+                                            "argumentTypes": [
+                                              {
+                                                "typeIdentifier": "t_contract$_OperatorFilterer_$1004",
+                                                "typeString": "contract OperatorFilterer"
+                                              }
+                                            ],
+                                            "id": 919,
+                                            "isConstant": false,
+                                            "isLValue": false,
+                                            "isPure": true,
+                                            "lValueRequested": false,
+                                            "nodeType": "ElementaryTypeNameExpression",
+                                            "src": "2099:7:6",
+                                            "typeDescriptions": {
+                                              "typeIdentifier": "t_type$_t_address_$",
+                                              "typeString": "type(address)"
+                                            },
+                                            "typeName": {
+                                              "id": 918,
+                                              "name": "address",
+                                              "nodeType": "ElementaryTypeName",
+                                              "src": "2099:7:6",
+                                              "typeDescriptions": {}
+                                            }
+                                          },
+                                          "id": 921,
+                                          "isConstant": false,
+                                          "isLValue": false,
+                                          "isPure": false,
+                                          "kind": "typeConversion",
+                                          "lValueRequested": false,
+                                          "nameLocations": [],
+                                          "names": [],
+                                          "nodeType": "FunctionCall",
+                                          "src": "2099:13:6",
+                                          "tryCall": false,
+                                          "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                          }
+                                        },
+                                        {
+                                          "id": 922,
+                                          "name": "subscriptionOrRegistrantToCopy",
+                                          "nodeType": "Identifier",
+                                          "overloadedDeclarations": [],
+                                          "referencedDeclaration": 884,
+                                          "src": "2114:30:6",
+                                          "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                          }
+                                        }
+                                      ],
+                                      "expression": {
+                                        "argumentTypes": [
+                                          {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                          },
+                                          {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                          }
+                                        ],
+                                        "expression": {
+                                          "id": 915,
+                                          "name": "OPERATOR_FILTER_REGISTRY",
+                                          "nodeType": "Identifier",
+                                          "overloadedDeclarations": [],
+                                          "referencedDeclaration": 881,
+                                          "src": "2051:24:6",
+                                          "typeDescriptions": {
+                                            "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                                            "typeString": "contract IOperatorFilterRegistry"
+                                          }
+                                        },
+                                        "id": 917,
+                                        "isConstant": false,
+                                        "isLValue": false,
+                                        "isPure": false,
+                                        "lValueRequested": false,
+                                        "memberLocation": "2076:22:6",
+                                        "memberName": "registerAndCopyEntries",
+                                        "nodeType": "MemberAccess",
+                                        "referencedDeclaration": 679,
+                                        "src": "2051:47:6",
+                                        "typeDescriptions": {
+                                          "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$returns$__$",
+                                          "typeString": "function (address,address) external"
+                                        }
+                                      },
+                                      "id": 923,
+                                      "isConstant": false,
+                                      "isLValue": false,
+                                      "isPure": false,
+                                      "kind": "functionCall",
+                                      "lValueRequested": false,
+                                      "nameLocations": [],
+                                      "names": [],
+                                      "nodeType": "FunctionCall",
+                                      "src": "2051:94:6",
+                                      "tryCall": false,
+                                      "typeDescriptions": {
+                                        "typeIdentifier": "t_tuple$__$",
+                                        "typeString": "tuple()"
+                                      }
+                                    },
+                                    "id": 924,
+                                    "nodeType": "ExpressionStatement",
+                                    "src": "2051:94:6"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        "id": 938,
+                        "nodeType": "IfStatement",
+                        "src": "1815:458:6",
+                        "trueBody": {
+                          "id": 908,
+                          "nodeType": "Block",
+                          "src": "1830:125:6",
+                          "statements": [
+                            {
+                              "expression": {
+                                "arguments": [
+                                  {
+                                    "arguments": [
+                                      {
+                                        "id": 903,
+                                        "name": "this",
+                                        "nodeType": "Identifier",
+                                        "overloadedDeclarations": [],
+                                        "referencedDeclaration": 4294967268,
+                                        "src": "1902:4:6",
+                                        "typeDescriptions": {
+                                          "typeIdentifier": "t_contract$_OperatorFilterer_$1004",
+                                          "typeString": "contract OperatorFilterer"
+                                        }
+                                      }
+                                    ],
+                                    "expression": {
+                                      "argumentTypes": [
+                                        {
+                                          "typeIdentifier": "t_contract$_OperatorFilterer_$1004",
+                                          "typeString": "contract OperatorFilterer"
+                                        }
+                                      ],
+                                      "id": 902,
+                                      "isConstant": false,
+                                      "isLValue": false,
+                                      "isPure": true,
+                                      "lValueRequested": false,
+                                      "nodeType": "ElementaryTypeNameExpression",
+                                      "src": "1894:7:6",
+                                      "typeDescriptions": {
+                                        "typeIdentifier": "t_type$_t_address_$",
+                                        "typeString": "type(address)"
+                                      },
+                                      "typeName": {
+                                        "id": 901,
+                                        "name": "address",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "1894:7:6",
+                                        "typeDescriptions": {}
+                                      }
+                                    },
+                                    "id": 904,
+                                    "isConstant": false,
+                                    "isLValue": false,
+                                    "isPure": false,
+                                    "kind": "typeConversion",
+                                    "lValueRequested": false,
+                                    "nameLocations": [],
+                                    "names": [],
+                                    "nodeType": "FunctionCall",
+                                    "src": "1894:13:6",
+                                    "tryCall": false,
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  },
+                                  {
+                                    "id": 905,
+                                    "name": "subscriptionOrRegistrantToCopy",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 884,
+                                    "src": "1909:30:6",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  }
+                                ],
+                                "expression": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    },
+                                    {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  ],
+                                  "expression": {
+                                    "id": 898,
+                                    "name": "OPERATOR_FILTER_REGISTRY",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 881,
+                                    "src": "1848:24:6",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                                      "typeString": "contract IOperatorFilterRegistry"
+                                    }
+                                  },
+                                  "id": 900,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1873:20:6",
+                                  "memberName": "registerAndSubscribe",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 671,
+                                  "src": "1848:45:6",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$returns$__$",
+                                    "typeString": "function (address,address) external"
+                                  }
+                                },
+                                "id": 906,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "kind": "functionCall",
+                                "lValueRequested": false,
+                                "nameLocations": [],
+                                "names": [],
+                                "nodeType": "FunctionCall",
+                                "src": "1848:92:6",
+                                "tryCall": false,
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_tuple$__$",
+                                  "typeString": "tuple()"
+                                }
+                              },
+                              "id": 907,
+                              "nodeType": "ExpressionStatement",
+                              "src": "1848:92:6"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "documentation": {
+              "id": 882,
+              "nodeType": "StructuredDocumentation",
+              "src": "1307:76:6",
+              "text": "@dev The constructor that is called when the contract is being deployed."
+            },
+            "id": 942,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 887,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 884,
+                  "mutability": "mutable",
+                  "name": "subscriptionOrRegistrantToCopy",
+                  "nameLocation": "1408:30:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 942,
+                  "src": "1400:38:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 883,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1400:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 886,
+                  "mutability": "mutable",
+                  "name": "subscribe",
+                  "nameLocation": "1445:9:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 942,
+                  "src": "1440:14:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 885,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1440:4:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1399:56:6"
+            },
+            "returnParameters": {
+              "id": 888,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1456:0:6"
+            },
+            "scope": 1004,
+            "src": "1388:901:6",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 959,
+              "nodeType": "Block",
+              "src": "2428:304:6",
+              "statements": [
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    },
+                    "id": 950,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 947,
+                      "name": "from",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 945,
+                      "src": "2638:4:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "expression": {
+                        "id": 948,
+                        "name": "msg",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4294967281,
+                        "src": "2646:3:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_magic_message",
+                          "typeString": "msg"
+                        }
+                      },
+                      "id": 949,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberLocation": "2650:6:6",
+                      "memberName": "sender",
+                      "nodeType": "MemberAccess",
+                      "src": "2646:10:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "2638:18:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 957,
+                  "nodeType": "IfStatement",
+                  "src": "2634:81:6",
+                  "trueBody": {
+                    "id": 956,
+                    "nodeType": "Block",
+                    "src": "2658:57:6",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "expression": {
+                                "id": 952,
+                                "name": "msg",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 4294967281,
+                                "src": "2693:3:6",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_magic_message",
+                                  "typeString": "msg"
+                                }
+                              },
+                              "id": 953,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberLocation": "2697:6:6",
+                              "memberName": "sender",
+                              "nodeType": "MemberAccess",
+                              "src": "2693:10:6",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            ],
+                            "id": 951,
+                            "name": "_checkFilterOperator",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 1003,
+                            "src": "2672:20:6",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_internal_view$_t_address_$returns$__$",
+                              "typeString": "function (address) view"
+                            }
+                          },
+                          "id": 954,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "nameLocations": [],
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "2672:32:6",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$__$",
+                            "typeString": "tuple()"
+                          }
+                        },
+                        "id": 955,
+                        "nodeType": "ExpressionStatement",
+                        "src": "2672:32:6"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": 958,
+                  "nodeType": "PlaceholderStatement",
+                  "src": "2724:1:6"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 943,
+              "nodeType": "StructuredDocumentation",
+              "src": "2295:77:6",
+              "text": " @dev A helper function to check if an operator is allowed."
+            },
+            "id": 960,
+            "name": "onlyAllowedOperator",
+            "nameLocation": "2386:19:6",
+            "nodeType": "ModifierDefinition",
+            "parameters": {
+              "id": 946,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 945,
+                  "mutability": "mutable",
+                  "name": "from",
+                  "nameLocation": "2414:4:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 960,
+                  "src": "2406:12:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 944,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2406:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2405:14:6"
+            },
+            "src": "2377:355:6",
+            "virtual": true,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 970,
+              "nodeType": "Block",
+              "src": "2892:58:6",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 966,
+                        "name": "operator",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 963,
+                        "src": "2923:8:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 965,
+                      "name": "_checkFilterOperator",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 1003,
+                      "src": "2902:20:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$_t_address_$returns$__$",
+                        "typeString": "function (address) view"
+                      }
+                    },
+                    "id": 967,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2902:30:6",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 968,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2902:30:6"
+                },
+                {
+                  "id": 969,
+                  "nodeType": "PlaceholderStatement",
+                  "src": "2942:1:6"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 961,
+              "nodeType": "StructuredDocumentation",
+              "src": "2738:86:6",
+              "text": " @dev A helper function to check if an operator approval is allowed."
+            },
+            "id": 971,
+            "name": "onlyAllowedOperatorApproval",
+            "nameLocation": "2838:27:6",
+            "nodeType": "ModifierDefinition",
+            "parameters": {
+              "id": 964,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 963,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "2874:8:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 971,
+                  "src": "2866:16:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 962,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2866:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2865:18:6"
+            },
+            "src": "2829:121:6",
+            "virtual": true,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 1002,
+              "nodeType": "Block",
+              "src": "3108:568:6",
+              "statements": [
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 984,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "expression": {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "id": 979,
+                              "name": "OPERATOR_FILTER_REGISTRY",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 881,
+                              "src": "3235:24:6",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                                "typeString": "contract IOperatorFilterRegistry"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                                "typeString": "contract IOperatorFilterRegistry"
+                              }
+                            ],
+                            "id": 978,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "3227:7:6",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 977,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "3227:7:6",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 980,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "nameLocations": [],
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "3227:33:6",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "id": 981,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberLocation": "3261:4:6",
+                        "memberName": "code",
+                        "nodeType": "MemberAccess",
+                        "src": "3227:38:6",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      },
+                      "id": 982,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberLocation": "3266:6:6",
+                      "memberName": "length",
+                      "nodeType": "MemberAccess",
+                      "src": "3227:45:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": ">",
+                    "rightExpression": {
+                      "hexValue": "30",
+                      "id": 983,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "3275:1:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "3227:49:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 1001,
+                  "nodeType": "IfStatement",
+                  "src": "3223:447:6",
+                  "trueBody": {
+                    "id": 1000,
+                    "nodeType": "Block",
+                    "src": "3278:392:6",
+                    "statements": [
+                      {
+                        "condition": {
+                          "id": 993,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "UnaryOperation",
+                          "operator": "!",
+                          "prefix": true,
+                          "src": "3522:68:6",
+                          "subExpression": {
+                            "arguments": [
+                              {
+                                "arguments": [
+                                  {
+                                    "id": 989,
+                                    "name": "this",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 4294967268,
+                                    "src": "3574:4:6",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_contract$_OperatorFilterer_$1004",
+                                      "typeString": "contract OperatorFilterer"
+                                    }
+                                  }
+                                ],
+                                "expression": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_contract$_OperatorFilterer_$1004",
+                                      "typeString": "contract OperatorFilterer"
+                                    }
+                                  ],
+                                  "id": 988,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "nodeType": "ElementaryTypeNameExpression",
+                                  "src": "3566:7:6",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_type$_t_address_$",
+                                    "typeString": "type(address)"
+                                  },
+                                  "typeName": {
+                                    "id": 987,
+                                    "name": "address",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "3566:7:6",
+                                    "typeDescriptions": {}
+                                  }
+                                },
+                                "id": 990,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "kind": "typeConversion",
+                                "lValueRequested": false,
+                                "nameLocations": [],
+                                "names": [],
+                                "nodeType": "FunctionCall",
+                                "src": "3566:13:6",
+                                "tryCall": false,
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              },
+                              {
+                                "id": 991,
+                                "name": "operator",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 974,
+                                "src": "3581:8:6",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                },
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              ],
+                              "expression": {
+                                "id": 985,
+                                "name": "OPERATOR_FILTER_REGISTRY",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 881,
+                                "src": "3523:24:6",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_contract$_IOperatorFilterRegistry_$863",
+                                  "typeString": "contract IOperatorFilterRegistry"
+                                }
+                              },
+                              "id": 986,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberLocation": "3548:17:6",
+                              "memberName": "isOperatorAllowed",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 657,
+                              "src": "3523:42:6",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_external_view$_t_address_$_t_address_$returns$_t_bool_$",
+                                "typeString": "function (address,address) view external returns (bool)"
+                              }
+                            },
+                            "id": 992,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "nameLocations": [],
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "3523:67:6",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            }
+                          },
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "id": 999,
+                        "nodeType": "IfStatement",
+                        "src": "3518:142:6",
+                        "trueBody": {
+                          "id": 998,
+                          "nodeType": "Block",
+                          "src": "3592:68:6",
+                          "statements": [
+                            {
+                              "errorCall": {
+                                "arguments": [
+                                  {
+                                    "id": 995,
+                                    "name": "operator",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 974,
+                                    "src": "3636:8:6",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  }
+                                ],
+                                "expression": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  ],
+                                  "id": 994,
+                                  "name": "OperatorNotAllowed",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 875,
+                                  "src": "3617:18:6",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_function_error_pure$_t_address_$returns$__$",
+                                    "typeString": "function (address) pure"
+                                  }
+                                },
+                                "id": 996,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "kind": "functionCall",
+                                "lValueRequested": false,
+                                "nameLocations": [],
+                                "names": [],
+                                "nodeType": "FunctionCall",
+                                "src": "3617:28:6",
+                                "tryCall": false,
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_tuple$__$",
+                                  "typeString": "tuple()"
+                                }
+                              },
+                              "id": 997,
+                              "nodeType": "RevertStatement",
+                              "src": "3610:35:6"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "documentation": {
+              "id": 972,
+              "nodeType": "StructuredDocumentation",
+              "src": "2956:77:6",
+              "text": " @dev A helper function to check if an operator is allowed."
+            },
+            "id": 1003,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_checkFilterOperator",
+            "nameLocation": "3047:20:6",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 975,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 974,
+                  "mutability": "mutable",
+                  "name": "operator",
+                  "nameLocation": "3076:8:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1003,
+                  "src": "3068:16:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 973,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3068:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3067:18:6"
+            },
+            "returnParameters": {
+              "id": 976,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "3108:0:6"
+            },
+            "scope": 1004,
+            "src": "3038:638:6",
+            "stateMutability": "view",
+            "virtual": true,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 1005,
+        "src": "1014:2664:6",
+        "usedErrors": [
+          875
+        ]
+      }
+    ],
+    "src": "32:3647:6"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.19+commit.7dd6d404.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.14",
+  "updatedAt": "2023-06-13T20:26:02.418Z",
+  "devdoc": {
+    "details": "This smart contract is meant to be inherited by token contracts so they can use the following:         - `onlyAllowedOperator` modifier for `transferFrom` and `safeTransferFrom` methods.         - `onlyAllowedOperatorApproval` modifier for `approve` and `setApprovalForAll` methods.         Please note that if your token contract does not provide an owner with EIP-173, it must provide         administration methods on the contract itself to interact with the registry otherwise the subscription         will be locked to the options set during construction.",
+    "errors": {
+      "OperatorNotAllowed(address)": [
+        {
+          "details": "Emitted when an operator is not allowed."
+        }
+      ]
+    },
+    "kind": "dev",
+    "methods": {
+      "constructor": {
+        "details": "The constructor that is called when the contract is being deployed."
+      }
+    },
+    "title": "OperatorFilterer",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "Abstract contract whose constructor automatically registers and optionally subscribes to or copies another         registrant's entries in the OperatorFilterRegistry.",
+    "version": 1
+  }
+}
