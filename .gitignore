@@ -1,71 +1,23 @@
-# references
-#   https://git-scm.com/docs/gitignore
-#   https://github.com/github/gitignore
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
 
-# source version control related
-CVS/
-.svn/
-.hg
+# Hardhat files
+cache
+artifacts
 
-# IDEs or tools related
-/.idea/
-/.vscode/
-.gradle/
 
-# directories for intermediate or final compiled artifacts
-/bin/
-/target/
-/output/
-/Debug/
-/Release/
-/x86/
-/x64/
-/obj/
-/package/
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
 
-# dependencies
-node_modules/*
-pkg/
+# Hardhat files
+cache
+artifacts
 
-# generated artifacts
-/reports/
-/_site/
-.apt_generated/
-.atp_generated_tests/
-.deps/
-
-# runtime outputs
-/run/
-/log/
-/logs/
-/test-output/
-*.log
-npm-debug.log
-
-# backups, caches, or temporary artifacts
-.~*
-._*
-*.bak
-.cache*
-.*.swp
-*.md.html
-package-lock.json
-Gemfile.lock
-.sass-cache
-__pycache__/
-.pytest_cache/
-packer_cache/
-/temp/
-
-# misc
-config.gypi
-.npmrc
-.jekyll-metadata
-.DS_Store
-.lock-wscript
-.wafpickle-N
-/*.tgz
-
-# env
-.prod.env
-.env.prod
